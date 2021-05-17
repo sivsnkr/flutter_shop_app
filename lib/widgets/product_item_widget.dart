@@ -9,7 +9,7 @@ class ProductItemWidget extends StatelessWidget {
   // ProductItemWidget(this.product);
   @override
   Widget build(BuildContext context) {
-    final product = Provider.of<Product>(context);
+    final product = Provider.of<Product>(context, listen: false);
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
@@ -24,14 +24,16 @@ class ProductItemWidget extends StatelessWidget {
           ),
           footer: GridTileBar(
             backgroundColor: Colors.black87,
-            leading: IconButton(
-              icon: Icon(
-                product.isFavourite ? Icons.favorite : Icons.favorite_border,
+            leading: Consumer<Product>(
+              builder: (ctx, product, child) => IconButton(
+                icon: Icon(
+                  product.isFavourite ? Icons.favorite : Icons.favorite_border,
+                ),
+                onPressed: () {
+                  product.toggleFavourite();
+                },
+                color: Theme.of(context).accentColor,
               ),
-              onPressed: () {
-                product.toggleFavourite();
-              },
-              color: Theme.of(context).accentColor,
             ),
             title: Text(
               product.title,

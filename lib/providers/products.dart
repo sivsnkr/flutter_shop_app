@@ -41,6 +41,10 @@ class Products with ChangeNotifier {
     return [..._items];
   }
 
+  List<Product> get favItems {
+    return _items.where((item) => item.isFavourite).toList();
+  }
+
   Product findById(itemId) {
     return _items.firstWhere((item) => item.id == itemId);
   }
