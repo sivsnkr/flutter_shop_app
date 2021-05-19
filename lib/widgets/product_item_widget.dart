@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
 import '../screens/product_details_screen.dart';
+import '../providers/cart.dart';
 
 class ProductItemWidget extends StatelessWidget {
   // final Product product;
@@ -10,6 +11,7 @@ class ProductItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
+    final cart = Provider.of<Cart>(context, listen: false);
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
@@ -41,7 +43,13 @@ class ProductItemWidget extends StatelessWidget {
             ),
             trailing: IconButton(
               icon: Icon(Icons.shopping_cart),
-              onPressed: () {},
+              onPressed: () {
+                cart.addItems(
+                  product.id,
+                  product.price,
+                  product.title,
+                );
+              },
               color: Theme.of(context).accentColor,
             ),
           ),
