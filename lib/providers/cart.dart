@@ -6,10 +6,10 @@ class CartItem {
   final price;
   final quantity;
   CartItem({
-    required this.id,
-    required this.price,
-    required this.title,
-    required this.quantity,
+    @required required this.id,
+    @required required this.price,
+    @required required this.title,
+    @required required this.quantity,
   });
 
   double get totalPrice {
@@ -50,5 +50,13 @@ class Cart with ChangeNotifier {
 
   int get itemCount {
     return _items.length;
+  }
+
+  double get totalAmount {
+    double total = 0;
+    _items.forEach((productId, cartItem) {
+      total += cartItem.totalPrice;
+    });
+    return total;
   }
 }

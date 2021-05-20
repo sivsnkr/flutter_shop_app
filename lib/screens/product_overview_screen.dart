@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/product_grid.dart';
+import './cart_screen.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
 
@@ -23,6 +24,20 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       appBar: AppBar(
         title: const Text('MyShop'),
         actions: [
+          Consumer<Cart>(
+            builder: (ctx, cart, child) => Badge(
+              child: child == null ? const Text('cart') : child,
+              // key: ,
+              value: cart.itemCount.toString(),
+              color: Colors.red,
+            ),
+            child: IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.of(context).pushNamed(CartScreen.routeName);
+              },
+            ),
+          ),
           PopupMenuButton(
             onSelected: (showProduct selectedValue) {
               if (selectedValue == showProduct.showFavoriteOnly)
@@ -45,18 +60,6 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
               ),
             ],
             icon: Icon(Icons.more_vert),
-          ),
-          Consumer<Cart>(
-            builder: (ctx, cart, child) => Badge(
-              child: child == null ? const Text('cart') : child,
-              // key: ,
-              value: cart.itemCount.toString(),
-              color: Colors.red,
-            ),
-            child: IconButton(
-              icon: Icon(Icons.shopping_cart),
-              onPressed: () {},
-            ),
           ),
         ],
       ),
