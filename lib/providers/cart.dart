@@ -48,6 +48,16 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
+  void removeItem(productId) {
+    if (_items.containsKey(productId)) {
+      print("found it!");
+      _items.remove(productId);
+      notifyListeners();
+    } else {
+      print("couldn't find it!");
+    }
+  }
+
   int get itemCount {
     return _items.length;
   }

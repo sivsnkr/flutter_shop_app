@@ -19,12 +19,46 @@ class ProductDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = getItem(context);
+    final product = getItem(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title),
+        title: Text(product.title),
       ),
-      body: Container(),
+      body: SingleChildScrollView(
+        child: Container(
+          child: Column(
+            children: [
+              Container(
+                height: 300,
+                width: double.infinity,
+                child: Image.network(
+                  product.imageUrl,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Rs ${product.price}',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                ),
+                child: Text(
+                  '${product.description}',
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
