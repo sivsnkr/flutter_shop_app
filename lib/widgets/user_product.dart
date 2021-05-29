@@ -5,7 +5,8 @@ import '../screens/edit_product_screen.dart';
 class UserProduct extends StatelessWidget {
   final String _title;
   final String _imageUrl;
-  UserProduct(this._title, this._imageUrl);
+  final String _id;
+  UserProduct(this._title, this._imageUrl, this._id);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -24,7 +25,7 @@ class UserProduct extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     Navigator.of(context)
-                        .pushNamed(EditProductScreen.routeName);
+                        .pushNamed(EditProductScreen.routeName, arguments: _id);
                   },
                   icon: Icon(
                     Icons.edit,

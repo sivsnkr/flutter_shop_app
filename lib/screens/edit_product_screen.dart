@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/products.dart';
 
+import '../providers/products.dart';
 import '../providers/product.dart';
 
 class EditProductScreen extends StatefulWidget {
@@ -15,7 +18,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     id: "",
     description: "",
     imageUrl: "",
-    price: -1,
+    price: 0,
     title: "",
     isFavourite: false,
   );
@@ -25,20 +28,47 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
-  void _saveForm() {
-    // logic goes here
+  @override
+  void initState() {
+    _imageUrlController.addListener(_handleImageUrlChange);
+    super.initState();
+  }
+
+  void _handleImageUrlChange() {
+    setState(() {});
+  }
+
+  void _saveForm(Products product) {
+    final validForm = _formKey.currentState?.validate();
+    if (validForm == null || !validForm) return;
     _formKey.currentState?.save();
+    if (_editedProduct.id.length == 0)
+      product.addProduct(_editedProduct);
+    else
+      product.editProduct(_editedProduct.id, _editedProduct);
+    Navigator.of(context).pop();
+  }
+
+  String? validator(String? value) {
+    if (value == null || value.isEmpty) return "This field can't be empty";
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final productId = ModalRoute.of(context)?.settings.arguments as String;
+    final Products product = Provider.of<Products>(context);
+    if (productId.length != 0) {
+      _editedProduct = product.findById(productId);
+      _imageUrlController.text = _editedProduct.imageUrl;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Product'),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: _saveForm,
+            onPressed: () => _saveForm(product),
           ),
         ],
       ),
@@ -51,9 +81,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
+                initialValue: _editedProduct.title,
                 onSaved: (value) {
                   _editedProduct = new Product(
-                    id: _editedProduct.id,
+                    id: productId,
                     description: _editedProduct.description,
                     imageUrl: _editedProduct.imageUrl,
                     price: _editedProduct.price,
@@ -61,9 +92,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     isFavourite: _editedProduct.isFavourite,
                   );
                 },
+                validator: validator,
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Price'),
+                initialValue: _editedProduct.price.toString(),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 onSaved: (value) {
@@ -76,10 +109,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     isFavourite: _editedProduct.isFavourite,
                   );
                 },
+                validator: (value) {
+                  final res = validator(value);
+                  if (res != null) return res;
+                  if (double.tryParse(value == null ? "" : value) == null)
+                    return "Please enter a valid price.";
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Description'),
                 textInputAction: TextInputAction.next,
+                initialValue: _editedProduct.description,
                 keyboardType: TextInputType.multiline,
                 maxLines: 3,
                 onSaved: (value) {
@@ -92,6 +133,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     isFavourite: _editedProduct.isFavourite,
                   );
                 },
+                validator: validator,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -123,8 +165,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         setState(() {});
                       },
                       onFieldSubmitted: (_) {
-                        _saveForm();
+                        _saveForm(product);
                       },
+                      validator: validator,
+                      // initialValue: _editedProduct.imageUrl,
                       onSaved: (value) {
                         _editedProduct = new Product(
                           id: _editedProduct.id,
