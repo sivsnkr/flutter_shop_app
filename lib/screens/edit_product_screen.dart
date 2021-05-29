@@ -20,6 +20,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     "imageUrl": "",
     "price": 0,
     "title": "",
+    "isFavourite": false,
   };
   @override
   void dispose() {
@@ -45,6 +46,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       _editedProduct['imageUrl'] = currentProduct.imageUrl;
       _editedProduct['price'] = currentProduct.price;
       _editedProduct['title'] = currentProduct.title;
+      _editedProduct['isFavourite'] = currentProduct.isFavourite;
       _imageUrlController.text = _editedProduct['imageUrl'].toString();
     }
     _isinit = true;
@@ -67,6 +69,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       imageUrl: _editedProduct['imageUrl'].toString(),
       price: double.parse(_editedProduct['price'].toString()),
       title: _editedProduct['title'].toString(),
+      isFavourite: _editedProduct['isFavourite'] as bool,
     );
 
     Products product = Provider.of<Products>(context, listen: false);

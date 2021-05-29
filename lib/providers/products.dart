@@ -50,8 +50,10 @@ class Products with ChangeNotifier {
   }
 
   void editProduct(productId, updatedProduct) {
-    _items.removeWhere((item) => item.id == productId);
-    addProduct(updatedProduct);
+    int itemIndex = _items.indexWhere((item) => item.id == productId);
+    if (itemIndex < 0) return;
+    _items[itemIndex] = updatedProduct;
+    notifyListeners();
   }
 
   void addProduct(Product item) {
