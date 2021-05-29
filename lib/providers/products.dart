@@ -49,14 +49,24 @@ class Products with ChangeNotifier {
     return _items.firstWhere((item) => item.id == itemId);
   }
 
-  void editProduct(productId, updatedProduct){
+  void editProduct(productId, updatedProduct) {
     _items.removeWhere((item) => item.id == productId);
     addProduct(updatedProduct);
   }
 
   void addProduct(Product item) {
-    item = new Product(id: item.id.length == 0?DateTime.now().toString():item.id, description: item.description,imageUrl: item.imageUrl,price: item.price, title: item.title);
+    item = new Product(
+        id: item.id.length == 0 ? DateTime.now().toString() : item.id,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        price: item.price,
+        title: item.title);
     _items.add(item);
+    notifyListeners();
+  }
+
+  void deleteProduct(productId) {
+    _items.removeWhere((item) => item.id == productId);
     notifyListeners();
   }
 }

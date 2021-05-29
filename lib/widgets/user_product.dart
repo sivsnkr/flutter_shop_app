@@ -6,7 +6,9 @@ class UserProduct extends StatelessWidget {
   final String _title;
   final String _imageUrl;
   final String _id;
-  UserProduct(this._title, this._imageUrl, this._id);
+  final Function _deleteItem;
+
+  UserProduct(this._title, this._imageUrl, this._id, this._deleteItem);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -33,7 +35,9 @@ class UserProduct extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _deleteItem(_id);
+                  },
                   icon: Icon(
                     Icons.delete,
                     color: Theme.of(context).errorColor,
