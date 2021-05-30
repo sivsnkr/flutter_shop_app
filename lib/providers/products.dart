@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'product.dart';
 
@@ -49,22 +52,48 @@ class Products with ChangeNotifier {
     return _items.firstWhere((item) => item.id == itemId);
   }
 
-  void editProduct(productId, updatedProduct) {
-    int itemIndex = _items.indexWhere((item) => item.id == productId);
-    if (itemIndex < 0) return;
-    _items[itemIndex] = updatedProduct;
-    notifyListeners();
+  Future<void> editProduct(productId, updatedProduct) {
+    return new Future(
+      () {
+        int itemIndex = _items.indexWhere((item) => item.id == productId);
+        if (itemIndex < 0) return;
+        _items[itemIndex] = updatedProduct;
+        notifyListeners();
+      },
+    );
   }
 
-  void addProduct(Product item) {
-    item = new Product(
-        id: item.id.length == 0 ? DateTime.now().toString() : item.id,
+  Future<void> addProduct(Product item) async {
+    final url = Uri.parse(
+      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json',
+    );
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode(
+          {
+            'title': item.title,
+            'description': item.description,
+            'price': item.price,
+            'isFavourite': item.isFavourite,
+            'imageUrl': item.imageUrl,
+          },
+        ),
+      );
+      final Product newItem = new Product(
+        id: json.decode(response.body)['name'],
         description: item.description,
         imageUrl: item.imageUrl,
         price: item.price,
-        title: item.title);
-    _items.add(item);
-    notifyListeners();
+        title: item.title,
+      );
+
+      _items.add(newItem);
+      notifyListeners();
+    } catch (error) {
+      print(error.toString());
+      throw error;
+    }
   }
 
   void deleteProduct(productId) {

@@ -14,6 +14,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   var _isinit = false;
+  bool _isLoading = false;
   Map<String, Object> _editedProduct = {
     "id": "",
     "description": "",
@@ -57,11 +58,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
     setState(() {});
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     final validForm = _formKey.currentState?.validate();
     if (validForm == null || !validForm) return;
 
     _formKey.currentState?.save();
+
+    setState(() {
+      _isLoading = true;
+    });
 
     Product newProduct = new Product(
       id: _editedProduct['id'].toString(),
@@ -73,12 +78,35 @@ class _EditProductScreenState extends State<EditProductScreen> {
     );
 
     Products product = Provider.of<Products>(context, listen: false);
-
-    if (_editedProduct['id'].toString().length == 0)
-      product.addProduct(newProduct);
-    else
-      product.editProduct(_editedProduct['id'], newProduct);
-    Navigator.of(context).pop();
+    try {
+      if (_editedProduct['id'].toString().length == 0)
+        await product.addProduct(newProduct);
+      else
+        await product.editProduct(_editedProduct['id'], newProduct);
+    } catch (error) {
+      await showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Error Happenned'),
+            content: Text('Something went wrong!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Text('Close'),
+              )
+            ],
+          );
+        },
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.of(context).pop();
+    }
   }
 
   String? validator(String? value) {
@@ -102,85 +130,99 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Title'),
-                textInputAction: TextInputAction.next,
-                initialValue: _editedProduct['title'].toString(),
-                onSaved: (value) => handleSave('title', value.toString()),
-                validator: validator,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Price'),
-                initialValue: _editedProduct['price'].toString(),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.number,
-                onSaved: (value) => handleSave('price', value.toString()),
-                validator: (value) {
-                  final res = validator(value);
-                  if (res != null) return res;
-                  if (double.tryParse(value == null ? "" : value) == null)
-                    return "Please enter a valid price.";
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Description'),
-                textInputAction: TextInputAction.next,
-                initialValue: _editedProduct['description'].toString(),
-                keyboardType: TextInputType.multiline,
-                maxLines: 3,
-                onSaved: (value) => handleSave('description', value.toString()),
-                validator: validator,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+      body: _isLoading
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 10, right: 8),
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 1,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    child: Image.network(
-                      _imageUrlController.text.isEmpty
-                          ? "https://numpaint.com/wp-content/uploads/2020/08/japan-autumn-season-paint-by-number.jpg"
-                          : _imageUrlController.text,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Image URL'),
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done,
-                      controller: _imageUrlController,
-                      onEditingComplete: () {
-                        setState(() {});
-                      },
-                      onFieldSubmitted: (_) {
-                        _saveForm();
-                      },
-                      validator: validator,
-                      onSaved: (value) =>
-                          handleSave('imageUrl', value.toString()),
-                    ),
+                  CircularProgressIndicator(),
+                  Text(
+                    'Hold on while we add your product',
+                    style: Theme.of(context).textTheme.headline6,
                   ),
                 ],
-              )
-            ],
-          ),
-        ),
-      ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Title'),
+                      textInputAction: TextInputAction.next,
+                      initialValue: _editedProduct['title'].toString(),
+                      onSaved: (value) => handleSave('title', value.toString()),
+                      validator: validator,
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Price'),
+                      initialValue: _editedProduct['price'].toString(),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.number,
+                      onSaved: (value) => handleSave('price', value.toString()),
+                      validator: (value) {
+                        final res = validator(value);
+                        if (res != null) return res;
+                        if (double.tryParse(value == null ? "" : value) == null)
+                          return "Please enter a valid price.";
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Description'),
+                      textInputAction: TextInputAction.next,
+                      initialValue: _editedProduct['description'].toString(),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      onSaved: (value) =>
+                          handleSave('description', value.toString()),
+                      validator: validator,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 10, right: 8),
+                          height: 100,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          child: Image.network(
+                            _imageUrlController.text.isEmpty
+                                ? "https://numpaint.com/wp-content/uploads/2020/08/japan-autumn-season-paint-by-number.jpg"
+                                : _imageUrlController.text,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(labelText: 'Image URL'),
+                            keyboardType: TextInputType.url,
+                            textInputAction: TextInputAction.done,
+                            controller: _imageUrlController,
+                            onEditingComplete: () {
+                              setState(() {});
+                            },
+                            onFieldSubmitted: (_) {
+                              _saveForm();
+                            },
+                            validator: validator,
+                            onSaved: (value) =>
+                                handleSave('imageUrl', value.toString()),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }
