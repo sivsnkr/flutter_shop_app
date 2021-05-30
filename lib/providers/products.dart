@@ -40,6 +40,34 @@ class Products with ChangeNotifier {
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     ),
   ];
+
+  Future<void> fetchAndSetProduct() async {
+    try {
+      final url = Uri.parse(
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json',
+      );
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      extractedData.forEach(
+        (prodId, prodValue) {
+          final item = new Product(
+            id: prodId,
+            description: prodValue['description'],
+            imageUrl: prodValue['imageUrl'],
+            price: prodValue['price'],
+            title: prodValue['title'],
+            isFavourite: prodValue['isFavourite'],
+          );
+          _items.add(item);
+        },
+      );
+      notifyListeners();
+    } catch (error) {
+      print(error);
+      throw error;
+    }
+  }
+
   List<Product> get items {
     return [..._items];
   }

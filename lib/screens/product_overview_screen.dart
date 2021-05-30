@@ -6,6 +6,7 @@ import './cart_screen.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
 import '../widgets/app_drawer.dart';
+import '../providers/products.dart';
 
 enum showProduct {
   showFavoriteOnly,
@@ -19,6 +20,17 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _showFavoritesOnly = false;
+  bool _isinit = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_isinit) {
+      Provider.of<Products>(context).fetchAndSetProduct();
+      _isinit = false;
+    }
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
