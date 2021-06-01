@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../models/http_exception.dart';
 
-import 'product.dart';
+import './product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -48,6 +49,7 @@ class Products with ChangeNotifier {
       );
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
       extractedData.forEach(
         (prodId, prodValue) {
           final item = new Product(
@@ -58,9 +60,10 @@ class Products with ChangeNotifier {
             title: prodValue['title'],
             isFavourite: prodValue['isFavourite'],
           );
-          _items.add(item);
+          loadedProducts.add(item);
         },
       );
+      _items = loadedProducts;
       notifyListeners();
     } catch (error) {
       print(error);
@@ -80,15 +83,29 @@ class Products with ChangeNotifier {
     return _items.firstWhere((item) => item.id == itemId);
   }
 
-  Future<void> editProduct(productId, updatedProduct) {
-    return new Future(
-      () {
-        int itemIndex = _items.indexWhere((item) => item.id == productId);
-        if (itemIndex < 0) return;
-        _items[itemIndex] = updatedProduct;
-        notifyListeners();
-      },
-    );
+  Future<void> editProduct(productId, Product updatedProduct) async {
+    int itemIndex = _items.indexWhere((item) => item.id == productId);
+    if (itemIndex < 0) return;
+    try {
+      final url = Uri.parse(
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json',
+      );
+      await http.patch(
+        url,
+        body: json.encode({
+          'title': updatedProduct.title,
+          'description': updatedProduct.description,
+          'price': updatedProduct.price,
+          'isFavourite': updatedProduct.isFavourite,
+          'imageUrl': updatedProduct.imageUrl
+        }),
+      );
+      _items[itemIndex] = updatedProduct;
+      notifyListeners();
+    } catch (error) {
+      print(error);
+      throw error;
+    }
   }
 
   Future<void> addProduct(Product item) async {
@@ -124,8 +141,19 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(productId) {
+  Future<void> deleteProduct(productId) async {
+    final productIndex = _items.indexWhere((item) => item.id == productId);
+    var item = _items[productIndex];
+    final url = Uri.parse(
+      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json',
+    );
     _items.removeWhere((item) => item.id == productId);
     notifyListeners();
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      _items.insert(productIndex, item);
+      notifyListeners();
+      throw HttpException('Could not delete product!');
+    }
   }
 }

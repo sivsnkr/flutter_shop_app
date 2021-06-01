@@ -25,7 +25,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   @override
   void didChangeDependencies() {
     if (_isinit) {
-      Provider.of<Products>(context).fetchAndSetProduct();
+      Provider.of<Products>(context, listen: false).fetchAndSetProduct();
       _isinit = false;
     }
     super.didChangeDependencies();
