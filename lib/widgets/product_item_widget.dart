@@ -6,8 +6,6 @@ import '../screens/product_details_screen.dart';
 import '../providers/cart.dart';
 
 class ProductItemWidget extends StatelessWidget {
-  // final Product product;
-  // ProductItemWidget(this.product);
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
@@ -31,8 +29,23 @@ class ProductItemWidget extends StatelessWidget {
                 icon: Icon(
                   product.isFavourite ? Icons.favorite : Icons.favorite_border,
                 ),
-                onPressed: () {
-                  product.toggleFavourite();
+                onPressed: () async {
+                  try {
+                    await product.toggleFavourite();
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Item successfully added to favourite.'),
+                      ),
+                    );
+                  } catch (error) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(error.toString()),
+                      ),
+                    );
+                  }
                 },
                 color: Theme.of(context).accentColor,
               ),
