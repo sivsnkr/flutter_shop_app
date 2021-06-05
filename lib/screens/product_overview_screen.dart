@@ -20,17 +20,6 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _showFavoritesOnly = false;
-  bool _isinit = true;
-
-  @override
-  void didChangeDependencies() {
-    if (_isinit) {
-      Provider.of<Products>(context, listen: false).fetchAndSetProduct();
-      _isinit = false;
-    }
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +66,24 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: GridViewProduct(_showFavoritesOnly),
+      body: FutureBuilder(
+        future: Provider.of<Products>(context).fetchAndSetProduct(),
+        builder: (ctx, dataSnapshot) {
+          if (dataSnapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (dataSnapshot.hasError) {
+            return Center(
+              child: Text(
+                "Cannot load your product",
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            );
+          }
+
+          return GridViewProduct(_showFavoritesOnly);
+        },
+      ),
     );
   }
 }

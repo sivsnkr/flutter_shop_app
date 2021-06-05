@@ -55,7 +55,6 @@ class Orders with ChangeNotifier {
       _orders = fetchedOrders.reversed.toList();
       notifyListeners();
     } catch (error) {
-      print("fsf");
       throw HttpException("Cannot fetch orders");
     }
   }

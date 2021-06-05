@@ -10,7 +10,15 @@ class UserProductScreen extends StatelessWidget {
   static const routeName = '/user-product';
 
   Future<void> _handleRefresh(context) async {
-    await Provider.of<Products>(context, listen: false).fetchAndSetProduct();
+    try {
+      await Provider.of<Products>(context, listen: false).fetchAndSetProduct();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to load your products"),
+        ),
+      );
+    }
   }
 
   @override
