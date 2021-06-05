@@ -31,11 +31,16 @@ class ProductItemWidget extends StatelessWidget {
                 ),
                 onPressed: () async {
                   try {
+                    bool isFavourite = product.isFavourite;
                     await product.toggleFavourite();
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Item successfully added to favourite.'),
+                        content: Text(
+                          !isFavourite
+                              ? 'Item successfully added to favourite.'
+                              : 'Item has been removed from your favourite.',
+                        ),
                       ),
                     );
                   } catch (error) {

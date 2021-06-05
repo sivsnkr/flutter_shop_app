@@ -31,11 +31,7 @@ class Product with ChangeNotifier {
       final response = await http.patch(
         url,
         body: json.encode({
-          'title': title,
-          'description': description,
-          'price': price,
           'isFavourite': isFavourite,
-          'imageUrl': imageUrl,
         }),
       );
       if (response.statusCode >= 400) {
