@@ -48,9 +48,10 @@ class Products with ChangeNotifier {
         'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json',
       );
       final response = await http.get(url);
-      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final extractedData = json.decode(response.body);
+      if (extractedData == null) return;
       final List<Product> loadedProducts = [];
-      extractedData.forEach(
+      (extractedData as Map<String, dynamic>).forEach(
         (prodId, prodValue) {
           final item = new Product(
             id: prodId,
@@ -66,7 +67,7 @@ class Products with ChangeNotifier {
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
-      print(error);
+      print(error.toString());
       throw error;
     }
   }

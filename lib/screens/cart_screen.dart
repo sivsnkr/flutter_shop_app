@@ -6,15 +6,8 @@ import '../widgets/cart_item.dart';
 import '../providers/orders.dart';
 import './orders_screen.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
-
-  @override
-  _CartScreenState createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +15,75 @@ class _CartScreenState extends State<CartScreen> {
     final cartItems = cart.items.values.toList();
     final cartKeys = cart.items.keys.toList();
 
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Cart'),
+      ),
+      body: Column(
+        children: [
+          Card(
+            margin: const EdgeInsets.all(15),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Total',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  // Spacer(),
+                  Chip(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    label: Text(
+                      'Rs ${cart.totalAmount.toStringAsFixed(2)}',
+                      style: Theme.of(context).primaryTextTheme.headline6,
+                    ),
+                  ),
+                  OrderNowButton(cart: cart),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (ctx, index) {
+                return CartItem(
+                  productId: cartKeys[index],
+                  id: cartItems[index].id,
+                  title: cartItems[index].title,
+                  price: cartItems[index].price,
+                  quantity: cartItems[index].quantity,
+                  removeItem: cart.removeItem,
+                );
+              },
+              itemCount: cartItems.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OrderNowButton extends StatefulWidget {
+  final cart;
+  const OrderNowButton({
+    Key? key,
+    required this.cart,
+  }) : super(key: key);
+
+  @override
+  _OrderNowButtonState createState() => _OrderNowButtonState();
+}
+
+class _OrderNowButtonState extends State<OrderNowButton> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cartItems = widget.cart.items.values.toList();
     void placeOrder() async {
       try {
         setState(() {
@@ -29,9 +91,9 @@ class _CartScreenState extends State<CartScreen> {
         });
         await Provider.of<Orders>(context, listen: false).addOrder(
           cartItems,
-          cart.totalAmount,
+          widget.cart.totalAmount,
         );
-        cart.clearCart();
+        widget.cart.clearCart();
         Navigator.of(context).pushNamed(OrdersScreen.routeName);
       } catch (error) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -47,76 +109,19 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Cart'),
-      ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  Text(
-                    "We are adding your order",
-                    style: Theme.of(context).textTheme.headline6,
-                  )
-                ],
+    return _isLoading
+        ? Center(
+            child: CircularProgressIndicator(),
+          )
+        : TextButton(
+            child: const Text(
+              'Order Now',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-            )
-          : Column(
-              children: [
-                Card(
-                  margin: const EdgeInsets.all(15),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total',
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        // Spacer(),
-                        Chip(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          label: Text(
-                            'Rs ${cart.totalAmount.toStringAsFixed(2)}',
-                            style: Theme.of(context).primaryTextTheme.headline6,
-                          ),
-                        ),
-                        TextButton(
-                          child: const Text(
-                            'Order Now',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          onPressed: cartItems.length <= 0 ? null : placeOrder,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (ctx, index) {
-                      return CartItem(
-                        productId: cartKeys[index],
-                        id: cartItems[index].id,
-                        title: cartItems[index].title,
-                        price: cartItems[index].price,
-                        quantity: cartItems[index].quantity,
-                        removeItem: cart.removeItem,
-                      );
-                    },
-                    itemCount: cartItems.length,
-                  ),
-                ),
-              ],
             ),
-    );
+            onPressed: cartItems.length <= 0 ? null : placeOrder,
+          );
   }
 }
