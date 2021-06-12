@@ -21,12 +21,13 @@ class Product with ChangeNotifier {
     this.isFavourite = false,
   });
 
-  Future<void> toggleFavourite() async {
+  Future<void> toggleFavourite(String? token) async {
     isFavourite = !isFavourite;
+    if (token == null) throw HttpException("Authorization Failed!");
     notifyListeners();
     try {
       final url = Uri.parse(
-        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$id.json',
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$id.json?auth=$token',
       );
       final response = await http.patch(
         url,

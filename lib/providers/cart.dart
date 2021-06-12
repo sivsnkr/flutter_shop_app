@@ -19,6 +19,8 @@ class CartItem {
 
 class Cart with ChangeNotifier {
   Map<String, CartItem> _items = {};
+  String? _token;
+  Cart(this._token, this._items);
   Map<String, CartItem> get items {
     return {..._items};
   }

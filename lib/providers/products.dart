@@ -8,11 +8,13 @@ import './product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [];
+  String? _token;
+  Products(this._token, this._items);
 
   Future<void> fetchAndSetProduct() async {
     try {
       final url = Uri.parse(
-        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json',
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json?auth=$_token',
       );
       final response = await http.get(url);
       final extractedData = json.decode(response.body);
@@ -55,7 +57,7 @@ class Products with ChangeNotifier {
     if (itemIndex < 0) return;
     try {
       final url = Uri.parse(
-        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json',
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json?auth=$_token',
       );
       await http.patch(
         url,
@@ -77,7 +79,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product item) async {
     final url = Uri.parse(
-      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json',
+      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json?auth=$_token',
     );
     try {
       final response = await http.post(
@@ -112,7 +114,7 @@ class Products with ChangeNotifier {
     final productIndex = _items.indexWhere((item) => item.id == productId);
     var item = _items[productIndex];
     final url = Uri.parse(
-      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json',
+      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items/$productId.json?auth=$_token',
     );
     _items.removeWhere((item) => item.id == productId);
     notifyListeners();

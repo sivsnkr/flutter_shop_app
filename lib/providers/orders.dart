@@ -21,6 +21,9 @@ class OrderItem {
 
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
+  String? _token;
+
+  Orders(this._token, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
@@ -28,7 +31,7 @@ class Orders with ChangeNotifier {
 
   Future<void> fetchAndSetOrder() async {
     final url = Uri.parse(
-        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json');
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json?auth=$_token');
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body);
@@ -61,7 +64,7 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> orderItem, double amount) async {
     final url = Uri.parse(
-      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json',
+      'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json?auth=$_token',
     );
     final timeStamp = DateTime.now();
     try {

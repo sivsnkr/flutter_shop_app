@@ -14,6 +14,7 @@ enum showProduct {
 }
 
 class ProductOverviewScreen extends StatefulWidget {
+  static const routeName = '/product-overview';
   @override
   _ProductOverviewScreenState createState() => _ProductOverviewScreenState();
 }
@@ -67,7 +68,8 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       ),
       drawer: AppDrawer(),
       body: FutureBuilder(
-        future: Provider.of<Products>(context).fetchAndSetProduct(),
+        future:
+            Provider.of<Products>(context, listen: false).fetchAndSetProduct(),
         builder: (ctx, dataSnapshot) {
           if (dataSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

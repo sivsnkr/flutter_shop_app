@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/product.dart';
 import '../screens/product_details_screen.dart';
 import '../providers/cart.dart';
+import '../providers/auth.dart';
 
 class ProductItemWidget extends StatelessWidget {
   @override
@@ -32,7 +33,8 @@ class ProductItemWidget extends StatelessWidget {
                 onPressed: () async {
                   try {
                     bool isFavourite = product.isFavourite;
-                    await product.toggleFavourite();
+                    await product.toggleFavourite(
+                        Provider.of<Auth>(context, listen: false).token);
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
