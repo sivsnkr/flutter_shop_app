@@ -11,7 +11,8 @@ class UserProductScreen extends StatelessWidget {
 
   Future<void> _handleRefresh(context) async {
     try {
-      await Provider.of<Products>(context, listen: false).fetchAndSetProduct();
+      await Provider.of<Products>(context, listen: false)
+          .fetchAndSetProduct(true);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -39,28 +40,45 @@ class UserProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () {
-          return _handleRefresh(context);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Consumer<Products>(
-            builder: (ctx, product, child) {
-              final productItems = product.items;
-              return ListView.builder(
-                itemBuilder: (ctx, index) {
-                  return UserProduct(
-                    productItems[index].title,
-                    productItems[index].imageUrl,
-                    productItems[index].id,
+      body: FutureBuilder(
+        future: _handleRefresh(context),
+        builder: (ctx, dataSnapshot) {
+          if (dataSnapshot.connectionState == ConnectionState.waiting)
+            return Center(child: CircularProgressIndicator());
+
+          if (dataSnapshot.hasError) {
+            return Center(
+              child: Text(
+                "Cannot load your product",
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () {
+              return _handleRefresh(context);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Consumer<Products>(
+                builder: (ctx, product, child) {
+                  final productItems = product.items;
+                  return ListView.builder(
+                    itemBuilder: (ctx, index) {
+                      return UserProduct(
+                        productItems[index].title,
+                        productItems[index].imageUrl,
+                        productItems[index].id,
+                      );
+                    },
+                    itemCount: product.items.length,
                   );
                 },
-                itemCount: product.items.length,
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

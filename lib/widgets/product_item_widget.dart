@@ -11,6 +11,7 @@ class ProductItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
@@ -34,7 +35,9 @@ class ProductItemWidget extends StatelessWidget {
                   try {
                     bool isFavourite = product.isFavourite;
                     await product.toggleFavourite(
-                        Provider.of<Auth>(context, listen: false).token);
+                      authData.token,
+                      authData.userId,
+                    );
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

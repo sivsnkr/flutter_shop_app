@@ -9,16 +9,24 @@ import './product.dart';
 class Products with ChangeNotifier {
   List<Product> _items = [];
   String? _token;
-  Products(this._token, this._items);
+  String? _userId;
+  Products(this._token, this._items, this._userId);
 
-  Future<void> fetchAndSetProduct() async {
+  Future<void> fetchAndSetProduct([bool filterByUser = false]) async {
     try {
+      final filterString =
+          filterByUser ? '&orderBy="creatorId"&equalTo="$_userId"' : "";
       final url = Uri.parse(
-        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json?auth=$_token',
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/items.json?auth=$_token' +
+            filterString,
       );
       final response = await http.get(url);
       final extractedData = json.decode(response.body);
       if (extractedData == null) return;
+      final favurl = Uri.parse(
+        'https://flutter-begineer-18e51-default-rtdb.asia-southeast1.firebasedatabase.app/userFavourites/$_userId.json?auth=$_token',
+      );
+      final favresponse = json.decode((await http.get(favurl)).body);
       final List<Product> loadedProducts = [];
       (extractedData as Map<String, dynamic>).forEach(
         (prodId, prodValue) {
@@ -28,7 +36,8 @@ class Products with ChangeNotifier {
             imageUrl: prodValue['imageUrl'],
             price: prodValue['price'],
             title: prodValue['title'],
-            isFavourite: prodValue['isFavourite'],
+            isFavourite:
+                favresponse == null ? false : favresponse[prodId] ?? false,
           );
           loadedProducts.add(item);
         },
@@ -36,6 +45,8 @@ class Products with ChangeNotifier {
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
+      print("error: ");
+      print(error.toString());
       throw HttpException("Failed to load Products");
     }
   }
@@ -65,8 +76,7 @@ class Products with ChangeNotifier {
           'title': updatedProduct.title,
           'description': updatedProduct.description,
           'price': updatedProduct.price,
-          'isFavourite': updatedProduct.isFavourite,
-          'imageUrl': updatedProduct.imageUrl
+          'imageUrl': updatedProduct.imageUrl,
         }),
       );
       _items[itemIndex] = updatedProduct;
@@ -89,8 +99,8 @@ class Products with ChangeNotifier {
             'title': item.title,
             'description': item.description,
             'price': item.price,
-            'isFavourite': item.isFavourite,
             'imageUrl': item.imageUrl,
+            'creatorId': _userId,
           },
         ),
       );
